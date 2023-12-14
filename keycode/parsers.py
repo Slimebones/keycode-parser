@@ -70,16 +70,15 @@ class TypescriptParser:
         if (codedepth < self.CodeMaxDepth):
             res += "{\n"
 
-        for k, v in mp.items():
-            if (codedepth == self.CodeMaxDepth):
-                res += f"\"{fullcode}\",\n"
-                continue
-
-            new_fullcode = fullcode + "." + k
-            res += \
-                self._parse_subcode(
-                    k, new_fullcode, v, indent_modifier + 1, codedepth + 1
-                )
+        if (codedepth == self.CodeMaxDepth):
+            res += f"\"{fullcode}\",\n"
+        else:
+            for k, v in mp.items():
+                new_fullcode = fullcode + "." + k
+                res += \
+                    self._parse_subcode(
+                        k, new_fullcode, v, indent_modifier + 1, codedepth + 1
+                    )
 
         if (codedepth < self.CodeMaxDepth):
             res += self._get_indentation(indent_modifier) + "},\n"
