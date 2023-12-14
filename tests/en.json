@@ -1,0 +1,32 @@
+{
+    "slimebones": {
+        "keycode-testing": {
+            "pizza": {
+                "str": {
+                    "title": {
+                        "$": "best pizza shop"
+                    },
+                    "description": {
+                        "$": "big soda always in stock"
+                    }
+                },
+                "udto": {
+                    "pizza": {
+                        "$": "pizza object"
+                    }
+                }
+            }
+        }
+    },
+    "delivery": {
+        "pizzaworld": {
+            "pizza": {
+                "udto": {
+                    "order": {
+                        "$": "pizza order"
+                    }
+                }
+            }
+        }
+    }
+}
