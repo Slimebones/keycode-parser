@@ -1,6 +1,6 @@
 import argparse
 from pathlib import Path
-from keycode.parsers import TypescriptParser
+from keycode_parser.parsers import TypescriptParser
 
 
 class CLI:

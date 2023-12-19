@@ -1,13 +1,19 @@
 [tool.poetry]
-name = "keycode"
+name = "keycode-parser"
 version = "0.1.0"
 description = ""
 authors = ["ryzhovalex <thed4rkof@gmail.com>"]
 license = "MIT"
 readme = "README.md"
+packages = [
+    {include = "keycode_parser"}
+]
 
 [tool.poetry.dependencies]
 python = "^3.11"
+
+[tool.poetry.scripts]
+keycode-parser = "keycode_parser.main:main"
 
 [build-system]
 requires = ["poetry-core"]
