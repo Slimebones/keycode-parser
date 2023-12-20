@@ -1,18 +1,16 @@
 import argparse
-from pathlib import Path
-from keycode_parser.parsers import TypescriptParser
+import sys
+
+from pykit.cls import Static
+
+from keycode_parser.boot import Boot
 
 
-class CLI:
+class CLI(Static):
     @staticmethod
     async def call():
         argparser = argparse.ArgumentParser()
-        argparser.add_argument("path", type=str)
-        argnamespace = argparser.parse_args()
-        parser = TypescriptParser(Path(argnamespace.path))
-        parsed = await parser.parse()
-        out_dir = Path("var")
-        out_dir.mkdir(parents=True, exist_ok=True)
-        with Path(out_dir, "out.ts").open("w+") as f:
-            f.write(parsed)
-
+        argparser.add_argument("-i", type=str, nargs="+", dest="input")
+        argparser.add_argument("-o", type=str, nargs="+", dest="output")
+        args = argparser.parse_args()
+        await Boot.from_cli(args.input, args.output).start()

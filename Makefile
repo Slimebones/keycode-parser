@@ -1,12 +1,16 @@
-export PYTEST_SHOW=all
-export args
+export pytest_show=all
 export t=.
+export inppaths
+export outpaths
+
+run:
+	poetry run python keycode_parser/main.py -i $(inppaths) -o $(outpaths)
 
 test:
-	poetry run coverage run -m pytest -x --ignore=tests/app -p no:warnings --show-capture=$(PYTEST_SHOW) --failed-first $(args) $(t)
+	poetry run coverage run -m pytest -x --ignore=tests/app -p no:warnings --show-capture=$(pytest_show) --failed-first $(t)
 
 lint:
-	poetry run ruff $(args) $(t)
+	poetry run ruff $(t)
 
 check: lint test
 
