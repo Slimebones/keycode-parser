@@ -1,15 +1,12 @@
 import re
-from typing import Literal
 
 from pykit.cls import Static
 
 from keycode_parser.regex import Regex
 from keycode_parser.sources import (
-    FilepathSource,
     Source,
     SourceContract,
     SourceUtils,
-    TextIOSource,
 )
 
 

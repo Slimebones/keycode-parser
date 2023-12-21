@@ -1,6 +1,5 @@
 import sys
-from io import StringIO
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 from pykit.func import FuncSpec
@@ -30,7 +29,7 @@ async def test_input_output(inp: list[str], out: list[str]):
     def stdout_write_mock(s: str) -> int:
         # print using function, otherwise i cannot capture the stdout using
         # IOUtils, don't know why for now
-        print(s, end="")
+        print(s, end="")  # noqa: T201
         return original_stdout_write(s)
 
     stdin_retval = "@code(\"c.p.m.t.v1\") @code(\"c.p.m.t.v2\")"

@@ -1,17 +1,16 @@
 import multiprocessing as mp
-from operator import contains
 import sys
 from multiprocessing import Process
 from pathlib import Path
-from typing import Callable, Literal, Self, TextIO
-from keycode_parser.codeparsers import CodeParser, TypescriptCodeParser
+from typing import Callable, Literal, Self
+
 from pykit import Log
 
+from keycode_parser.codeparsers import CodeParser, TypescriptCodeParser
 from keycode_parser.sources import (
     FilepathSource,
     Source,
     SourceContract,
-    SourceUtils,
     TextIOSource,
 )
 from keycode_parser.utils import CodeUtils
@@ -50,7 +49,7 @@ class Boot:
             path = Path(r)
             res.append(FilepathSource(
                 source=path,
-                contract=SourceContract(path.suffix.replace(".", "")).value
+                contract=SourceContract(path.suffix.replace(".", "")).value,
             ))
 
         return res
@@ -76,7 +75,7 @@ class Boot:
             _, raw_extension = raw.split(":")
             contract = SourceContract(raw_extension)
             return TextIOSource.model_construct(
-                source=sys.stdin, contract=contract.value
+                source=sys.stdin, contract=contract.value,
             )
         elif raw == "@stdout":
             if mode == "input":
@@ -85,7 +84,7 @@ class Boot:
                 )
             return TextIOSource.model_construct(
                 source=sys.stdout,
-                contract="txt"
+                contract="txt",
             )
         else:
             raise ValueError(f"unrecognized raw source {raw}")
@@ -134,7 +133,7 @@ class Boot:
                     target=self._write_to_output_file,
                     args=(
                         source.source,
-                        content
+                        content,
                     ),
                 )
                 p.start()

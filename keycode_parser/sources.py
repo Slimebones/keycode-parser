@@ -5,8 +5,10 @@ from pathlib import Path
 from typing import Any, Self, TextIO
 
 from pydantic import BaseModel as Model
-from pydantic import (ValidationError, field_serializer, field_validator,
-                      validator)
+from pydantic import (
+    field_serializer,
+    field_validator,
+)
 from pykit.cls import Static
 
 
@@ -52,8 +54,8 @@ class Source(Model):
             return typing.cast(type[Self], cls._find_type(
                 t,
                 typing.cast(
-                    type[Self], c
-                )
+                    type[Self], c,
+                ),
             ))
 
         raise ValueError
