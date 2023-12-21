@@ -165,8 +165,8 @@ class Boot:
         # TODO(ryzhovalex):
         #       pass should_insert_last_newline=False once available
         AutoUtils.generate(
-            name=path.name,
-            extension=FileExtension(path.suffix),
+            name=path.stem,
+            extension=FileExtension(path.suffix.replace(".", "")),
             author="keycode-parser",
             dir=path.parent,
             content=content,

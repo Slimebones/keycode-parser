@@ -6,7 +6,8 @@ respect-gitignore = true
 
 exclude = [
     "docs/source/conf.py",
-    ".vscode"
+    ".vscode",
+    "*.pseudo.py"
 ]
 
 ignore = [
