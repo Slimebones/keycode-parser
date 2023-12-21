@@ -3,11 +3,15 @@ import sys
 from multiprocessing import Process
 from pathlib import Path
 from typing import Callable, Literal, Self
-from autofiles import AutoUtils, FileExtension
 
+from autofiles import AutoUtils, FileExtension
 from pykit import Log
 
-from keycode_parser.codeparsers import CodeParser, PythonCodeParser, TypescriptCodeParser
+from keycode_parser.codeparsers import (
+    CodeParser,
+    PythonCodeParser,
+    TypescriptCodeParser,
+)
 from keycode_parser.sources import (
     FilepathSource,
     Source,
@@ -92,7 +96,7 @@ class Boot:
             contract = SourceContract(raw_extension)
             return TextIOSource.model_construct(
                 source=sys.stdout,
-                contract=contract.value
+                contract=contract.value,
             )
         else:
             raise ValueError(f"unrecognized raw source {raw}")
@@ -133,7 +137,9 @@ class Boot:
         for source in self._output_sources:
             if source.contract not in content_by_contract:
                 content_by_contract[source.contract] = \
-                    self._CodeParserByOutputContract[source.contract].parse(codes)
+                    self._CodeParserByOutputContract[source.contract].parse(
+                        codes,
+                    )
             content = content_by_contract[source.contract]
 
             if isinstance(source, FilepathSource):
@@ -163,5 +169,5 @@ class Boot:
             extension=FileExtension(path.suffix),
             author="keycode-parser",
             dir=path.parent,
-            content=content
+            content=content,
         )

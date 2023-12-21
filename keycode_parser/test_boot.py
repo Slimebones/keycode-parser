@@ -1,5 +1,4 @@
 import sys
-from difflib import ndiff
 from unittest.mock import patch
 
 import pytest
@@ -18,19 +17,19 @@ from keycode_parser.boot import Boot
             "txt",
             "c.p.m.t.v1,c.p.m.t.v2",
             "txt",
-            "c.p.m.t.v1,c.p.m.t.v2"
+            "c.p.m.t.v1,c.p.m.t.v2",
         ),
         (
             "py",
             "@code(\"c.p.m.t.v1\") @code(\"c.p.m.t.v2\")",
             "txt",
-            "c.p.m.t.v1,c.p.m.t.v2"
+            "c.p.m.t.v1,c.p.m.t.v2",
         ),
         (
             "ts",
             "@code(\"c.p.m.t.v1\") @code(\"c.p.m.t.v2\")",
             "txt",
-            "c.p.m.t.v1,c.p.m.t.v2"
+            "c.p.m.t.v1,c.p.m.t.v2",
         ),
         # ---
 
@@ -46,7 +45,7 @@ from keycode_parser.boot import Boot
             class m:
                 class t:
                     v2 = "c.p.m.t.v2"
-"""
+""",
         ),
         (
             "py",
@@ -58,7 +57,7 @@ from keycode_parser.boot import Boot
             class m:
                 class t:
                     v2 = "c.p.m.t.v2"
-"""
+""",
         ),
         (
             "ts",
@@ -70,7 +69,7 @@ from keycode_parser.boot import Boot
             class m:
                 class t:
                     v2 = "c.p.m.t.v2"
-"""
+""",
         ),
         # ---
 
@@ -90,7 +89,7 @@ from keycode_parser.boot import Boot
     },
   };
 };
-"""
+""",
         ),
         (
             "py",
@@ -107,7 +106,7 @@ from keycode_parser.boot import Boot
     },
   };
 };
-"""
+""",
         ),
         (
             "ts",
@@ -124,7 +123,7 @@ from keycode_parser.boot import Boot
     },
   };
 };
-"""
+""",
         ),
     ),
 )
@@ -132,13 +131,13 @@ async def test_stdin_stdout(
     stdin_contract: str,
     stdin_retval: str,
     stdout_contract: str,
-    expected_stdout: str
+    expected_stdout: str,
 ):
     original_stdout_write = sys.stdout.write
-    global res
+    global res  # noqa: PLW0602
 
     def stdout_write_mock(s: str) -> int:
-        global res
+        global res  # noqa: PLW0603
         res = s
         return original_stdout_write(s)
 
@@ -146,7 +145,7 @@ async def test_stdin_stdout(
         sys.stdout.write = stdout_write_mock
         await Boot.from_cli(
             ["@stdin:" + stdin_contract],
-            ["@stdout:" + stdout_contract]
+            ["@stdout:" + stdout_contract],
         ).start()
 
         # remove mock for possible print-debug without surprises

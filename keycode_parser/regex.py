@@ -10,7 +10,7 @@ class Regex(Static):
 
     InputBySourceContract: dict[SourceContract, list[str]] = {
         SourceContract.TXT: [
-            r"(" + Code + r")"
+            r"(" + Code + r")",
         ],
         SourceContract.PY: [
             r"@code\(\"(" + Code + r")\"\)",

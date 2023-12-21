@@ -21,10 +21,10 @@ class CodeUtils(Static):
                 parts[1]: {
                     parts[2]: {
                         parts[3]: {
-                            parts[4]: c
-                        }
-                    }
-                }
+                            parts[4]: c,
+                        },
+                    },
+                },
             }
 
         return res
