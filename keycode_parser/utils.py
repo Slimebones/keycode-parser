@@ -47,7 +47,9 @@ class CodeUtils(Static):
         res = []
         content: str = SourceUtils.read(source)
 
-        for regex in Regex.ByFileExtension[SourceContract(source.contract)]:
+        for regex in Regex.InputBySourceContract[
+            SourceContract(source.contract)
+        ]:
             res.extend([m.group(1) for m in re.finditer(regex, content)])
 
         return res

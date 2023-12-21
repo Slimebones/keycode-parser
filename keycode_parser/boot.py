@@ -3,10 +3,11 @@ import sys
 from multiprocessing import Process
 from pathlib import Path
 from typing import Callable, Literal, Self
+from autofiles import AutoUtils, FileExtension
 
 from pykit import Log
 
-from keycode_parser.codeparsers import CodeParser, TypescriptCodeParser
+from keycode_parser.codeparsers import CodeParser, PythonCodeParser, TypescriptCodeParser
 from keycode_parser.sources import (
     FilepathSource,
     Source,
@@ -17,8 +18,9 @@ from keycode_parser.utils import CodeUtils
 
 
 class Boot:
-    _CodeParserByContract: dict[str, CodeParser] = {
+    _CodeParserByOutputContract: dict[str, CodeParser] = {
         SourceContract.TXT.value: CodeParser(),
+        SourceContract.PY.value: PythonCodeParser(),
         SourceContract.TS.value: TypescriptCodeParser(),
     }
 
@@ -67,6 +69,10 @@ class Boot:
             raise ValueError(
                 "specify stdin in format \"@stdin:<extension>\"",
             )
+        elif raw == "@stdout":
+            raise ValueError(
+                "specify stdout in format \"@stdout:<extension>\"",
+            )
         elif raw.startswith("@stdin"):
             if mode == "output":
                 raise ValueError(
@@ -77,14 +83,16 @@ class Boot:
             return TextIOSource.model_construct(
                 source=sys.stdin, contract=contract.value,
             )
-        elif raw == "@stdout":
+        elif raw.startswith("@stdout"):
             if mode == "input":
                 raise ValueError(
                     "stdout source cannot appear in input",
                 )
+            _, raw_extension = raw.split(":")
+            contract = SourceContract(raw_extension)
             return TextIOSource.model_construct(
                 source=sys.stdout,
-                contract="txt",
+                contract=contract.value
             )
         else:
             raise ValueError(f"unrecognized raw source {raw}")
@@ -125,7 +133,7 @@ class Boot:
         for source in self._output_sources:
             if source.contract not in content_by_contract:
                 content_by_contract[source.contract] = \
-                    self._CodeParserByContract[source.contract].parse(codes)
+                    self._CodeParserByOutputContract[source.contract].parse(codes)
             content = content_by_contract[source.contract]
 
             if isinstance(source, FilepathSource):
@@ -147,7 +155,11 @@ class Boot:
             p.join()
 
     def _write_to_output_file(self, path: Path, content: str) -> None:
-        # output file is always overwritten, path should be checked before that
-        # it is truly an auto file
-        with path.open( "w+") as f:
-            f.write(content)
+        # user doesn't have to put .auto_ prefixes to output paths
+        AutoUtils.generate(
+            name=path.name,
+            extension=FileExtension(path.suffix),
+            author="keycode-parser",
+            dir=path.parent,
+            content=content
+        )

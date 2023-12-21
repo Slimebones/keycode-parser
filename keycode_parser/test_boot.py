@@ -11,19 +11,34 @@ from keycode_parser.io import IOUtils
 @pytest.mark.asyncio
 @pytest.mark.capture_stdout
 @pytest.mark.parametrize(
-    ("inp", "out"),
+    ("stdin_contract", "stdin_retval", "stdout_contract", "expected_stdout"),
     (
         (
-            (
-                "@stdin:py",
-            ),
-            (
-                "@stdout",
-            ),
+            "txt",
+            "c.p.m.t.v1,c.p.m.t.v2",
+            "txt",
+            "c.p.m.t.v1,c.p.m.t.v2"
+        ),
+        (
+            "py",
+            "@code(\"c.p.m.t.v1\") @code(\"c.p.m.t.v2\")",
+            "txt",
+            "c.p.m.t.v1,c.p.m.t.v2"
+        ),
+        (
+            "ts",
+            "@code(\"c.p.m.t.v1\") @code(\"c.p.m.t.v2\")",
+            "txt",
+            "c.p.m.t.v1,c.p.m.t.v2"
         ),
     ),
 )
-async def test_input_output(inp: list[str], out: list[str]):
+async def test_stdin_stdout(
+    stdin_contract: str,
+    stdin_retval: str,
+    stdout_contract: str,
+    expected_stdout: str
+):
     original_stdout_write = sys.stdout.write
 
     def stdout_write_mock(s: str) -> int:
@@ -32,12 +47,10 @@ async def test_input_output(inp: list[str], out: list[str]):
         print(s, end="")  # noqa: T201
         return original_stdout_write(s)
 
-    stdin_retval = "@code(\"c.p.m.t.v1\") @code(\"c.p.m.t.v2\")"
-
     with patch.object(sys.stdin, "read", return_value=stdin_retval):
         sys.stdout.write = stdout_write_mock
         stdout = await IOUtils.async_capture_stdout(FuncSpec(Boot.from_cli(
-            inp, out,
+            ["@stdin:" + stdin_contract], ["@stdout:" + stdout_contract]
         ).start))
 
-        assert stdout == "c.p.m.t.v1,c.p.m.t.v2"
+        assert stdout == expected_stdout

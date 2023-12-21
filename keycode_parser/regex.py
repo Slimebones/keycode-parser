@@ -8,8 +8,15 @@ class Regex(Static):
     # time (i.e. lazy) for that
     Code: str = r"[a-zA-Z0-9-]+\.[a-zA-Z0-9-]+\.[a-zA-Z0-9-]+\.[a-zA-Z0-9-]+\.[a-zA-Z0-9-]+"  # noqa: E501
 
-    ByFileExtension: dict[SourceContract, list[str]] = {
+    InputBySourceContract: dict[SourceContract, list[str]] = {
+        SourceContract.TXT: [
+            r"(" + Code + r")"
+        ],
         SourceContract.PY: [
+            r"@code\(\"(" + Code + r")\"\)",
+            r"@legacycode\(\"(" + Code + r")\"\)",
+        ],
+        SourceContract.TS: [
             r"@code\(\"(" + Code + r")\"\)",
             r"@legacycode\(\"(" + Code + r")\"\)",
         ],
