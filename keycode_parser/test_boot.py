@@ -2,10 +2,8 @@ import sys
 from unittest.mock import patch
 
 import pytest
-from pykit.func import FuncSpec
 
 from keycode_parser.boot import Boot
-from keycode_parser.io import IOUtils
 
 
 @pytest.mark.asyncio
@@ -40,17 +38,18 @@ async def test_stdin_stdout(
     expected_stdout: str
 ):
     original_stdout_write = sys.stdout.write
+    global res
 
     def stdout_write_mock(s: str) -> int:
-        # print using function, otherwise i cannot capture the stdout using
-        # IOUtils, don't know why for now
-        print(s, end="")  # noqa: T201
+        global res
+        res = s
         return original_stdout_write(s)
 
     with patch.object(sys.stdin, "read", return_value=stdin_retval):
         sys.stdout.write = stdout_write_mock
-        stdout = await IOUtils.async_capture_stdout(FuncSpec(Boot.from_cli(
-            ["@stdin:" + stdin_contract], ["@stdout:" + stdout_contract]
-        ).start))
+        await Boot.from_cli(
+            ["@stdin:" + stdin_contract],
+            ["@stdout:" + stdout_contract]
+        ).start()
 
-        assert stdout == expected_stdout
+        assert res == expected_stdout
