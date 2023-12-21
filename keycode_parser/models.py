@@ -13,3 +13,7 @@ class PathSource(Source):
 
 class StdoutSource(Source):
     source: None = None
+
+
+class StdinSource(Source):
+    source: None = None

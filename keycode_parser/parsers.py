@@ -16,7 +16,7 @@ class TypescriptParser:
     ) -> None:
         self._path = path
 
-    async def parse(self) -> str:
+    def parse(self) -> str:
         with self._path.open("r") as f:
             return self._parse_mp(json.load(f))
 

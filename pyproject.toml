@@ -12,6 +12,7 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.11"
 slimebones-pykit = "^0.4.13"
+aiofiles = "^23.2.1"
 
 [tool.poetry.scripts]
 keycode-parser = "keycode_parser.main:main"
