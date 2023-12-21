@@ -1,4 +1,5 @@
 import re
+from typing import Iterable
 
 from pykit.cls import Static
 
@@ -8,31 +9,35 @@ from keycode_parser.sources import (
     SourceContract,
     SourceUtils,
 )
+from pydantic.v1.utils import deep_update
 
 
 class CodeUtils(Static):
     @staticmethod
-    def parse_map_from_codes(codes: list[str]) -> dict[str, dict]:
+    def parse_map_from_codes(codes: Iterable[str]) -> dict[str, dict]:
         res = {}
 
         for c in codes:
             parts = c.split(".")
-            res[parts[0]] = {
-                parts[1]: {
-                    parts[2]: {
-                        parts[3]: {
-                            parts[4]: c,
+            upd = {
+                parts[0]: {
+                    parts[1]: {
+                        parts[2]: {
+                            parts[3]: {
+                                parts[4]: c
+                            },
                         },
                     },
-                },
+                }
             }
+            res = deep_update(res, upd)
 
         return res
 
     @staticmethod
     def search_for_codes(
         source: Source | dict,
-    ) -> list[str]:
+    ) -> set[str]:
         """
         Performs searching in the given source for all codes defined by Keycode
         standard.
@@ -52,12 +57,12 @@ class CodeUtils(Static):
         if source.contract is None:
             raise ValueError(f"{source} should have a contract")
 
-        res = []
+        res = set()
         content: str = SourceUtils.read(source)
 
         for regex in Regex.InputBySourceContract[
             SourceContract(source.contract)
         ]:
-            res.extend([m.group(1) for m in re.finditer(regex, content)])
+            res.update([m.group(1) for m in re.finditer(regex, content)])
 
         return res

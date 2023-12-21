@@ -102,14 +102,14 @@ class Boot:
             raise ValueError(f"unrecognized raw source {raw}")
 
     async def start(self) -> None:
-        codes: list[str] = self._collect_codes()
+        codes: set[str] = self._collect_codes()
         if not codes:
             Log.info("no codes were collected")
             return
         self._write_codes(codes)
 
-    def _collect_codes(self) -> list[str]:
-        res: list[str] = []
+    def _collect_codes(self) -> set[str]:
+        res: set[str] = set()
 
         pool_res = []
         pool = mp.Pool()
@@ -125,11 +125,11 @@ class Boot:
 
         for pr in pool_res:
             if pr not in res:
-                res.extend(pr)
+                res.update(pr)
 
         return res
 
-    def _write_codes(self, codes: list[str]) -> None:
+    def _write_codes(self, codes: set[str]) -> None:
         # memoized contents, for now collected synchronously
         content_by_contract: dict[str, str] = {}
         processes: list[Process] = []

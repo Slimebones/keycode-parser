@@ -656,13 +656,13 @@ files = [
 
 [[package]]
 name = "slimebones-autofiles"
-version = "0.1.1"
+version = "0.1.2"
 description = ""
 optional = false
 python-versions = ">=3.11,<4.0"
 files = [
-    {file = "slimebones_autofiles-0.1.1-py3-none-any.whl", hash = "sha256:1991c1ac4f04c5b2ac025105feac0afc0502f64d593193a44f6b14bcc2628d08"},
-    {file = "slimebones_autofiles-0.1.1.tar.gz", hash = "sha256:313757a66208c980c97c465041ef503ac2c4512939ee0369fc601c40ae75ba6e"},
+    {file = "slimebones_autofiles-0.1.2-py3-none-any.whl", hash = "sha256:20a72aacd4fdda20555847d87e9baca903467def02760d0066f4f84c1c8a412c"},
+    {file = "slimebones_autofiles-0.1.2.tar.gz", hash = "sha256:c831d94b30bf72d47ddf621be027c7ad439266ff4e10fd3680c0ec4549563d15"},
 ]
 
 [package.dependencies]
@@ -742,4 +742,4 @@ dev = ["black (>=19.3b0)", "pytest (>=4.6.2)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "28b0b97a8b168342724d3d764c7533e4a13b1ccc32172c2872115b28a6834f11"
+content-hash = "06873b37fba56835d51cd1c3c3e025f8a6782c628d36debf5f9051db194ac957"

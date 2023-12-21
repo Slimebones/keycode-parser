@@ -1,3 +1,5 @@
+from typing import Iterable
+
 from keycode_parser.utils import CodeUtils
 
 
@@ -11,7 +13,7 @@ class CodeParser:
     def __init__(self) -> None:
         pass
 
-    def parse(self, codes: list[str]) -> str:
+    def parse(self, codes: Iterable[str]) -> str:
         return ",".join(codes)
 
 
@@ -30,7 +32,7 @@ class TypescriptCodeParser(CodeParser):
     def _parse_compatible_code(cls, code: str) -> str:
         return code.replace("-", "_")
 
-    def parse(self, codes: list[str]) -> str:
+    def parse(self, codes: Iterable[str]) -> str:
         return self._parse_map(CodeUtils.parse_map_from_codes(codes))
 
     def _parse_map(self, map: dict) -> str:
