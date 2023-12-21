@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any, Callable, Literal, Self
 
 import aiofiles
-from keycode_parser.types import KeycodeTuple
+from keycode_parser.types import CodeTuple
 
 from keycode_parser.models import PathSource, Source, StdinSource, StdoutSource
 
@@ -55,17 +55,17 @@ class Boot:
         return res
 
     async def start(self) -> None:
-        tuplelist: list[KeycodeTuple] = self._collect_input_sources_map()
+        tuplelist: list[CodeTuple] = self._collect_input_sources_map()
         content: str = self._convert_tuplelist_to_content(tuplelist)
         self._write_content_to_output_sources(content)
 
     def _convert_tuplelist_to_content(
-        self, tuplelist: list[KeycodeTuple]
+        self, tuplelist: list[CodeTuple]
     ) -> str:
         return "stub"
 
-    def _collect_input_sources_map(self) -> list[KeycodeTuple]:
-        res: list[KeycodeTuple] = []
+    def _collect_input_sources_map(self) -> list[CodeTuple]:
+        res: list[CodeTuple] = []
 
         pool_res = []
         pool = mp.Pool()
@@ -88,12 +88,12 @@ class Boot:
         pool.join()
 
         for pr in pool_res:
-            partial_tuple = pr.get()
-            res.update()
+            if pr not in res:
+                res.append(pr)
 
         return res
 
-    def _collect_tuple_from_path(self, path: Path) -> KeycodeTuple:
+    def _collect_tuple_from_path(self, path: Path) -> CodeTuple:
         # parser = TypescriptParser(Path(args.path))
         # parsed = await parser.parse()
         # out_dir = Path("var")
@@ -102,21 +102,30 @@ class Boot:
         #     f.write(parsed)
         return "path", "path", "path", "path", "path"
 
-    def _collect_tuple_from_stdin(self) -> KeycodeTuple:
+    def _collect_tuple_from_stdin(self) -> CodeTuple:
         return "stdin", "stdin", "stdin", "stdin", "stdin"
 
     def _write_content_to_output_sources(self, content: str) -> None:
-        tasks: list[Process] = []
+        processes: list[Process] = []
 
         for outsrc in self._output_sources:
             if isinstance(outsrc, PathSource):
-                tasks.append(asyncio.create_task(
-                    self._write_to_output_file(outsrc.source, content)
-                ))
+                p = Process(
+                    target=self._write_to_output_file,
+                    args=(
+                        outsrc.source,
+                        content
+                    )
+                )
+                p.start()
+                processes.append(p)
             elif isinstance(outsrc, StdoutSource):
                 print(content)
             else:
                 raise ValueError(f"unrecognized output source {outsrc}")
+
+        for p in processes:
+            p.join()
 
     def _write_to_output_file(self, path: Path, content: str) -> None:
         # output file is always overwritten, path should be checked before that

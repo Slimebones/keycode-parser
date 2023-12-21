@@ -1,44 +1,49 @@
-import json
-from pathlib import Path
-import re
+from keycode_parser.utils import CodeUtils
 
 
-class TypescriptParser:
+class CodeParser:
     """
-    Parses any supported format of structured codes into a typescript object.
+    Parses keycodes in special format.
+
+    This is a base, yet not abstract class. By default it join incoming
+    codes with comma in format `<code_1>,<code_2>,<code_3`.
     """
-    Indentation = 2
-    CodeMaxDepth = 5
+    def __init__(self) -> None:
+        pass
 
-    def __init__(
-        self,
-        path: Path
-    ) -> None:
-        self._path = path
+    def parse(self, codes: list[str]) -> str:
+        return ",".join(codes)
 
-    def parse(self) -> str:
-        with self._path.open("r") as f:
-            return self._parse_mp(json.load(f))
+
+class TypescriptCodeParser(CodeParser):
+    _Indentation = 2
+    _CodeMaxDepth = 5
+
+    def __init__(self) -> None:
+        super().__init__()
 
     @classmethod
     def _get_indentation(cls, modifier: int) -> str:
-        return modifier * cls.Indentation * " "
+        return modifier * cls._Indentation * " "
 
     @classmethod
     def _parse_compatible_code(cls, code: str) -> str:
         return code.replace("-", "_")
 
-    def _parse_mp(self, mp: dict) -> str:
+    def parse(self, codes: list[str]) -> str:
+        return self._parse_map(CodeUtils.parse_map_from_codes(codes))
+
+    def _parse_map(self, map: dict) -> str:
         res = "export default abstract class Codes {\n"
 
-        for k, v in mp.items():
+        for k, v in map.items():
             if (not isinstance(v, dict)):
                 raise TypeError("company should have subvalues")
             res += self._parse_company(k, v)
             res += "\n"
 
         res = res.removesuffix("\n")
-        res += "}"
+        res += "};"
         return res
 
     def _parse_company(self, company_name: str, mp: dict) -> str:
@@ -67,10 +72,10 @@ class TypescriptParser:
             self._get_indentation(indent_modifier) \
             + f"{self._parse_compatible_code(partcode)}: "
 
-        if (codedepth < self.CodeMaxDepth):
+        if (codedepth < self._CodeMaxDepth):
             res += "{\n"
 
-        if (codedepth == self.CodeMaxDepth):
+        if (codedepth == self._CodeMaxDepth):
             res += f"\"{fullcode}\",\n"
         else:
             for k, v in mp.items():
@@ -80,7 +85,8 @@ class TypescriptParser:
                         k, new_fullcode, v, indent_modifier + 1, codedepth + 1
                     )
 
-        if (codedepth < self.CodeMaxDepth):
+        if (codedepth < self._CodeMaxDepth):
             res += self._get_indentation(indent_modifier) + "},\n"
 
         return res
+

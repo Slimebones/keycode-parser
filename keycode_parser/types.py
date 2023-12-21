@@ -1,1 +1,1 @@
-KeycodeTuple = tuple[str, str, str, str, str]
+CodeTuple = tuple[str, str, str, str, str]
