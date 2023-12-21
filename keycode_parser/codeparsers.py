@@ -43,7 +43,7 @@ class TypescriptCodeParser(CodeParser):
             res += "\n"
 
         res = res.removesuffix("\n")
-        res += "};"
+        res += "};\n"
         return res
 
     def _parse_company(self, company_name: str, mp: dict) -> str:
@@ -130,7 +130,6 @@ class PythonCodeParser(CodeParser):
         for k, v in mp.items():
             res += self._parse_subcode(k, company_name + "." + k, v, 2, 2)
 
-        res += self._get_indentation(1) + "};\n"
         return res
 
     def _parse_subcode(  # noqa: PLR0913

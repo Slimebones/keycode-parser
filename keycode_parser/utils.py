@@ -17,7 +17,15 @@ class CodeUtils(Static):
 
         for c in codes:
             parts = c.split(".")
-            res[parts[0]][parts[1]][parts[2]][parts[3]][parts[4]] = c
+            res[parts[0]] = {
+                parts[1]: {
+                    parts[2]: {
+                        parts[3]: {
+                            parts[4]: c
+                        }
+                    }
+                }
+            }
 
         return res
 

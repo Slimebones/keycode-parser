@@ -156,6 +156,8 @@ class Boot:
 
     def _write_to_output_file(self, path: Path, content: str) -> None:
         # user doesn't have to put .auto_ prefixes to output paths
+        # TODO(ryzhovalex):
+        #       pass should_insert_last_newline=False once available
         AutoUtils.generate(
             name=path.name,
             extension=FileExtension(path.suffix),
