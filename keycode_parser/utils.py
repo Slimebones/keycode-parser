@@ -1,4 +1,5 @@
 import re
+from typing import Literal
 
 from pykit.cls import Static
 
@@ -7,6 +8,7 @@ from keycode_parser.sources import (
     FilepathSource,
     Source,
     SourceContract,
+    SourceUtils,
     TextIOSource,
 )
 
@@ -39,21 +41,24 @@ class CodeUtils(Static):
         Returns:
             List of found codes (could be empty).
         """
-        res = []
-
         if source.contract is None:
             raise ValueError(f"{source} should have a contract")
 
-        content: str
-        if isinstance(source, TextIOSource):
-            content = source.source.read()
-        elif isinstance(source, FilepathSource):
-            with source.source.open("r") as f:
-                content = f.read()
-        else:
-            raise TypeError(f"unsupported source {source}")
+        content: str = SourceUtils.read(source)
 
-        for regex in Regex.ByFileExtension[SourceContract(source.contract)]:
+        return CodeUtils.search_for_codes_native(source.contract, content)
+
+    @staticmethod
+    def search_for_codes_native(
+        contract: str,
+        content: str
+    ) -> list[str]:
+        """
+        Search for codes - version for the multiprocessing.
+        """
+        res = []
+
+        for regex in Regex.ByFileExtension[SourceContract(contract)]:
             res.extend([m.group(0) for m in re.finditer(regex, content)])
 
         return res

@@ -1,0 +1,7 @@
+{
+    "python.testing.pytestArgs": [
+        "keycode_parser"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+}

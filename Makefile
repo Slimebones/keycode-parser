@@ -7,7 +7,7 @@ run:
 	poetry run python keycode_parser/main.py -i $(inppaths) -o $(outpaths)
 
 test:
-	poetry run coverage run -m pytest -x --ignore=tests/app -p no:warnings --show-capture=$(pytest_show) --failed-first $(t)
+	poetry run coverage run -m pytest -x --ignore=tests/app -p no:warnings --show-capture=$(pytest_show) --failed-first -s $(t)
 
 lint:
 	poetry run ruff $(t)

@@ -1,13 +1,15 @@
 import multiprocessing as mp
+from operator import contains
 import sys
 from multiprocessing import Process
 from pathlib import Path
-from typing import Callable, Literal, Self
+from typing import Callable, Literal, Self, TextIO
 
 from keycode_parser.sources import (
     FilepathSource,
     Source,
     SourceContract,
+    SourceUtils,
     TextIOSource,
 )
 from keycode_parser.utils import CodeUtils
@@ -62,13 +64,15 @@ class Boot:
                 )
             _, raw_extension = raw.split(":")
             contract = SourceContract(raw_extension)
-            return TextIOSource(source=sys.stdin, contract=contract.value)
+            return TextIOSource.model_construct(
+                source=sys.stdin, contract=contract.value
+            )
         elif raw == "@stdout":
             if mode == "input":
                 raise ValueError(
                     "stdout source cannot appear in input",
                 )
-            return TextIOSource(source=sys.stdout)
+            return TextIOSource.model_construct(source=sys.stdout)
         else:
             raise ValueError(f"unrecognized raw source {raw}")
 
@@ -90,8 +94,12 @@ class Boot:
         pool = mp.Pool()
 
         for source in self._input_sources:
-            func: Callable = CodeUtils.search_for_codes
-            args: tuple = (source,)
+            # TODO(ryzhovalex):
+            #   do not read here, read inside process, so refactor
+            #   CodeUtils.search_for_codes_native
+            content: str = SourceUtils.read(source)
+            func: Callable = CodeUtils.search_for_codes_native
+            args: tuple = (source.contract, content)
 
             pool_res.append(pool.apply(func, args))
 

@@ -1,6 +1,6 @@
 import sys
 from io import StringIO
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pytest
 from pykit.func import FuncSpec
@@ -15,7 +15,7 @@ from keycode_parser.io import IOUtils
     (
         (
             (
-                "@stdin",
+                "@stdin:py",
             ),
             (
                 "@stdout",
@@ -24,13 +24,11 @@ from keycode_parser.io import IOUtils
     ),
 )
 async def test_input_output(inp: list[str], out: list[str]):
-    if "@stdin" in inp:
-        sys.stdin = Mock(return_value=StringIO(
-            "@code(\"c.p.m.t.v1\") @code(\"c.p.m.t.v2\")",
-        ))
+    stdin_retval = "@code(\"c.p.m.t.v1\") @code(\"c.p.m.t.v2\")"
 
-    stdout = await IOUtils.async_capture_stdout(FuncSpec(Boot.from_cli(
-        inp, out,
-    ).start))
+    with patch.object(sys.stdin, "read", return_value=stdin_retval):
+        stdout = await IOUtils.async_capture_stdout(FuncSpec(Boot.from_cli(
+            inp, out,
+        ).start))
 
-    assert stdout == "c.p.m.t.v1,c.p.m.t.v2"
+        assert stdout == "c.p.m.t.v1,c.p.m.t.v2"
