@@ -4,6 +4,8 @@ import sys
 from multiprocessing import Process
 from pathlib import Path
 from typing import Callable, Literal, Self, TextIO
+from keycode_parser.codeparsers import CodeParser, TypescriptCodeParser
+from pykit import Log
 
 from keycode_parser.sources import (
     FilepathSource,
@@ -16,6 +18,11 @@ from keycode_parser.utils import CodeUtils
 
 
 class Boot:
+    _CodeParserByContract: dict[str, CodeParser] = {
+        SourceContract.TXT.value: CodeParser(),
+        SourceContract.TS.value: TypescriptCodeParser(),
+    }
+
     def __init__(
         self,
         input_sources: list[Source],
@@ -38,14 +45,18 @@ class Boot:
 
         for r in raw:
             if r.startswith("@"):
-                res.append(cls._process_special_raw_source(r, mode))
+                res.append(cls._parse_special_raw_source(r, mode))
                 continue
-            res.append(FilepathSource(source=Path(r)))
+            path = Path(r)
+            res.append(FilepathSource(
+                source=path,
+                contract=SourceContract(path.suffix.replace(".", "")).value
+            ))
 
         return res
 
     @classmethod
-    def _process_special_raw_source(
+    def _parse_special_raw_source(
         cls,
         raw: str,
         mode: Literal["input", "output"],
@@ -72,34 +83,29 @@ class Boot:
                 raise ValueError(
                     "stdout source cannot appear in input",
                 )
-            return TextIOSource.model_construct(source=sys.stdout)
+            return TextIOSource.model_construct(
+                source=sys.stdout,
+                contract="txt"
+            )
         else:
             raise ValueError(f"unrecognized raw source {raw}")
 
     async def start(self) -> None:
-        codes: list[str] = self._collect_input_sources_map()
-        content: str = self._convert_codes_to_content(codes)
-        self._write_content_to_output_sources(content)
+        codes: list[str] = self._collect_codes()
+        if not codes:
+            Log.info("no codes were collected")
+            return
+        self._write_codes(codes)
 
-    def _convert_codes_to_content(
-        self,
-        codes: list[str],
-    ) -> str:
-        return "stub"
-
-    def _collect_input_sources_map(self) -> list[str]:
+    def _collect_codes(self) -> list[str]:
         res: list[str] = []
 
         pool_res = []
         pool = mp.Pool()
 
         for source in self._input_sources:
-            # TODO(ryzhovalex):
-            #   do not read here, read inside process, so refactor
-            #   CodeUtils.search_for_codes_native
-            content: str = SourceUtils.read(source)
-            func: Callable = CodeUtils.search_for_codes_native
-            args: tuple = (source.contract, content)
+            func: Callable = CodeUtils.search_for_codes
+            args: tuple = (source.api,)
 
             pool_res.append(pool.apply(func, args))
 
@@ -108,20 +114,27 @@ class Boot:
 
         for pr in pool_res:
             if pr not in res:
-                res.append(pr)
+                res.extend(pr)
 
         return res
 
-    def _write_content_to_output_sources(self, content: str) -> None:
+    def _write_codes(self, codes: list[str]) -> None:
+        # memoized contents, for now collected synchronously
+        content_by_contract: dict[str, str] = {}
         processes: list[Process] = []
 
         for source in self._output_sources:
+            if source.contract not in content_by_contract:
+                content_by_contract[source.contract] = \
+                    self._CodeParserByContract[source.contract].parse(codes)
+            content = content_by_contract[source.contract]
+
             if isinstance(source, FilepathSource):
                 p = Process(
                     target=self._write_to_output_file,
                     args=(
                         source.source,
-                        content,
+                        content
                     ),
                 )
                 p.start()

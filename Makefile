@@ -1,13 +1,13 @@
 export pytest_show=all
 export t=.
-export inppaths
-export outpaths
+export i
+export o
 
 run:
-	poetry run python keycode_parser/main.py -i $(inppaths) -o $(outpaths)
+	poetry run python keycode_parser/main.py -i $(i) -o $(o)
 
 test:
-	poetry run coverage run -m pytest -x --ignore=tests/app -p no:warnings --show-capture=$(pytest_show) --failed-first -s $(t)
+	poetry run coverage run -m pytest -x --ignore=tests/app -p no:warnings --show-capture=$(pytest_show) --failed-first $(t)
 
 lint:
 	poetry run ruff $(t)

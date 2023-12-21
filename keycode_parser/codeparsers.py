@@ -89,4 +89,3 @@ class TypescriptCodeParser(CodeParser):
             res += self._get_indentation(indent_modifier) + "},\n"
 
         return res
-

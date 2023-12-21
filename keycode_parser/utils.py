@@ -26,7 +26,7 @@ class CodeUtils(Static):
 
     @staticmethod
     def search_for_codes(
-        source: Source,
+        source: Source | dict,
     ) -> list[str]:
         """
         Performs searching in the given source for all codes defined by Keycode
@@ -41,24 +41,16 @@ class CodeUtils(Static):
         Returns:
             List of found codes (could be empty).
         """
+        if isinstance(source, dict):
+            source = Source.recover(source)
+
         if source.contract is None:
             raise ValueError(f"{source} should have a contract")
 
+        res = []
         content: str = SourceUtils.read(source)
 
-        return CodeUtils.search_for_codes_native(source.contract, content)
-
-    @staticmethod
-    def search_for_codes_native(
-        contract: str,
-        content: str
-    ) -> list[str]:
-        """
-        Search for codes - version for the multiprocessing.
-        """
-        res = []
-
-        for regex in Regex.ByFileExtension[SourceContract(contract)]:
-            res.extend([m.group(0) for m in re.finditer(regex, content)])
+        for regex in Regex.ByFileExtension[SourceContract(source.contract)]:
+            res.extend([m.group(1) for m in re.finditer(regex, content)])
 
         return res
