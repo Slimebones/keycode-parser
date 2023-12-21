@@ -1,6 +1,6 @@
 from contextlib import redirect_stdout
 from io import StringIO
-from typing import Any, Awaitable, Callable
+
 from pykit.cls import Static
 from pykit.func import FuncSpec
 

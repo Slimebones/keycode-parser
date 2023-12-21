@@ -60,13 +60,13 @@ class TypescriptCodeParser(CodeParser):
         res += self._get_indentation(1) + "};\n"
         return res
 
-    def _parse_subcode(
+    def _parse_subcode(  # noqa: PLR0913
         self,
         partcode: str,
         fullcode: str,
         mp: dict,
         indent_modifier: int,
-        codedepth: int
+        codedepth: int,
     ) -> str:
         res = \
             self._get_indentation(indent_modifier) \
@@ -82,7 +82,7 @@ class TypescriptCodeParser(CodeParser):
                 new_fullcode = fullcode + "." + k
                 res += \
                     self._parse_subcode(
-                        k, new_fullcode, v, indent_modifier + 1, codedepth + 1
+                        k, new_fullcode, v, indent_modifier + 1, codedepth + 1,
                     )
 
         if (codedepth < self._CodeMaxDepth):

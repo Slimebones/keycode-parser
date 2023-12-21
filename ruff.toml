@@ -10,6 +10,12 @@ exclude = [
 ]
 
 ignore = [
+    "TRY003",
+    "FA102",
+    "TD003",
+    "FIX002",
+    "RUF012",
+
     # False-Positive
     "PD011",
 

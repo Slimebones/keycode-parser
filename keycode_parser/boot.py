@@ -1,11 +1,15 @@
 import multiprocessing as mp
+import sys
 from multiprocessing import Process
 from pathlib import Path
-import sys
-from typing import Any, Callable, Literal, Self
-from keycode_parser.sources import SourceContract
+from typing import Callable, Literal, Self
 
-from keycode_parser.sources import FilepathSource, Source, TextIOSource
+from keycode_parser.sources import (
+    FilepathSource,
+    Source,
+    SourceContract,
+    TextIOSource,
+)
 from keycode_parser.utils import CodeUtils
 
 
@@ -13,7 +17,7 @@ class Boot:
     def __init__(
         self,
         input_sources: list[Source],
-        output_sources: list[Source]
+        output_sources: list[Source],
     ) -> None:
         self._input_sources = input_sources
         self._output_sources = output_sources
@@ -26,7 +30,7 @@ class Boot:
 
     @classmethod
     def _parse_sources(
-        cls, raw: list[str], mode: Literal["input", "output"]
+        cls, raw: list[str], mode: Literal["input", "output"],
     ) -> list[Source]:
         res: list[Source] = []
 
@@ -42,19 +46,19 @@ class Boot:
     def _process_special_raw_source(
         cls,
         raw: str,
-        mode: Literal["input", "output"]
+        mode: Literal["input", "output"],
     ) -> Source:
         """
         Special raw source - starts with "@".
         """
         if raw == "@stdin":
             raise ValueError(
-                "specify stdin in format \"@stdin:<extension>\""
+                "specify stdin in format \"@stdin:<extension>\"",
             )
         elif raw.startswith("@stdin"):
             if mode == "output":
                 raise ValueError(
-                    "stdin source cannot appear in output"
+                    "stdin source cannot appear in output",
                 )
             _, raw_extension = raw.split(":")
             contract = SourceContract(raw_extension)
@@ -62,7 +66,7 @@ class Boot:
         elif raw == "@stdout":
             if mode == "input":
                 raise ValueError(
-                    "stdout source cannot appear in input"
+                    "stdout source cannot appear in input",
                 )
             return TextIOSource(source=sys.stdout)
         else:
@@ -75,7 +79,7 @@ class Boot:
 
     def _convert_codes_to_content(
         self,
-        codes: list[str]
+        codes: list[str],
     ) -> str:
         return "stub"
 
@@ -109,15 +113,15 @@ class Boot:
                     target=self._write_to_output_file,
                     args=(
                         source.source,
-                        content
-                    )
+                        content,
+                    ),
                 )
                 p.start()
                 processes.append(p)
             elif isinstance(source, TextIOSource):
                 source.source.write(content)
             else:
-                raise ValueError(f"unrecognized output source {source}")
+                raise TypeError(f"unrecognized output source {source}")
 
         for p in processes:
             p.join()

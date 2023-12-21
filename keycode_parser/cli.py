@@ -1,5 +1,4 @@
 import argparse
-import sys
 
 from pykit.cls import Static
 

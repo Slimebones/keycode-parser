@@ -1,10 +1,14 @@
 import re
-import sys
+
 from pykit.cls import Static
 
-from keycode_parser.sources import SourceContract
-from keycode_parser.sources import FilepathSource, Source, TextIOSource
 from keycode_parser.regex import Regex
+from keycode_parser.sources import (
+    FilepathSource,
+    Source,
+    SourceContract,
+    TextIOSource,
+)
 
 
 class CodeUtils(Static):
@@ -20,7 +24,7 @@ class CodeUtils(Static):
 
     @staticmethod
     def search_for_codes(
-        source: Source
+        source: Source,
     ) -> list[str]:
         """
         Performs searching in the given source for all codes defined by Keycode
@@ -50,7 +54,6 @@ class CodeUtils(Static):
             raise TypeError(f"unsupported source {source}")
 
         for regex in Regex.ByFileExtension[SourceContract(source.contract)]:
-            for m in re.finditer(regex, content):
-                res.append(m.group(0))
+            res.extend([m.group(0) for m in re.finditer(regex, content)])
 
         return res
