@@ -7,17 +7,21 @@ from pykit.func import FuncSpec
 
 class IOUtils(Static):
     @staticmethod
-    def capture_stdout(funcspec: FuncSpec) -> str:
+    def capture_stdout(func: FuncSpec) -> str:
         io = StringIO()
         with redirect_stdout(io):
-            funcspec.call()
+            func.call()
         return io.getvalue()
-
 
     # TODO(ryzhovalex): replace with AsyncFunc
     @staticmethod
-    async def async_capture_stdout(funcspec: FuncSpec) -> str:
+    async def async_capture_stdout(func: FuncSpec) -> str:
         io = StringIO()
         with redirect_stdout(io):
-            funcspec.call()
+            if func.args:
+                await func.func(func.args)
+            elif func.kwargs:
+                await func.func(func.args, **func.kwargs)
+            else:
+                await func.func()
         return io.getvalue()

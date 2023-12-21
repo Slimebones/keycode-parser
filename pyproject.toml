@@ -12,7 +12,6 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.11"
 slimebones-pykit = "^0.4.14"
-aiofiles = "^23.2.1"
 slimebones-autofiles = "^0.1.1"
 
 [tool.poetry.scripts]

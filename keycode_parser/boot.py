@@ -1,14 +1,13 @@
 import multiprocessing as mp
-import argparse
-import asyncio
 from multiprocessing import Process
 from pathlib import Path
+import sys
 from typing import Any, Callable, Literal, Self
+from keycode_parser.sources import SourceContract
 
-import aiofiles
-from keycode_parser.types import CodeTuple
+from keycode_parser.sources import FilepathSource, Source, TextIOSource
+from keycode_parser.utils import CodeUtils
 
-from keycode_parser.models import PathSource, Source, StdinSource, StdoutSource
 
 class Boot:
     def __init__(
@@ -32,55 +31,63 @@ class Boot:
         res: list[Source] = []
 
         for r in raw:
-            match r:
-                case "@stdout":
-                    if mode == "input":
-                        raise ValueError(
-                            "stdout source cannot appear in input"
-                        )
-                    res.append(StdoutSource())
-                case "@stdin":
-                    # this could be a default source, since gnu apps generally
-                    # do this by default, but to comply with my input-output
-                    # source systems, we wanted to make it explicit
-
-                    if mode == "output":
-                        raise ValueError(
-                            "stdin source cannot appear in input"
-                        )
-                    res.append(StdinSource())
-                case _:
-                    res.append(PathSource(source=Path(r)))
+            if r.startswith("@"):
+                res.append(cls._process_special_raw_source(r, mode))
+                continue
+            res.append(FilepathSource(source=Path(r)))
 
         return res
 
+    @classmethod
+    def _process_special_raw_source(
+        cls,
+        raw: str,
+        mode: Literal["input", "output"]
+    ) -> Source:
+        """
+        Special raw source - starts with "@".
+        """
+        if raw == "@stdin":
+            raise ValueError(
+                "specify stdin in format \"@stdin:<extension>\""
+            )
+        elif raw.startswith("@stdin"):
+            if mode == "output":
+                raise ValueError(
+                    "stdin source cannot appear in output"
+                )
+            _, raw_extension = raw.split(":")
+            contract = SourceContract(raw_extension)
+            return TextIOSource(source=sys.stdin, contract=contract.value)
+        elif raw == "@stdout":
+            if mode == "input":
+                raise ValueError(
+                    "stdout source cannot appear in input"
+                )
+            return TextIOSource(source=sys.stdout)
+        else:
+            raise ValueError(f"unrecognized raw source {raw}")
+
     async def start(self) -> None:
-        tuplelist: list[CodeTuple] = self._collect_input_sources_map()
-        content: str = self._convert_tuplelist_to_content(tuplelist)
+        codes: list[str] = self._collect_input_sources_map()
+        content: str = self._convert_codes_to_content(codes)
         self._write_content_to_output_sources(content)
 
-    def _convert_tuplelist_to_content(
-        self, tuplelist: list[CodeTuple]
+    def _convert_codes_to_content(
+        self,
+        codes: list[str]
     ) -> str:
         return "stub"
 
-    def _collect_input_sources_map(self) -> list[CodeTuple]:
-        res: list[CodeTuple] = []
+    def _collect_input_sources_map(self) -> list[str]:
+        res: list[str] = []
 
         pool_res = []
         pool = mp.Pool()
 
-        for inpsrc in self._input_sources:
-            func: Callable
-            args: tuple = tuple()
-
-            if isinstance(inpsrc, PathSource):
-                func = self._collect_tuple_from_path
-                args = (inpsrc.source,)
-            elif isinstance(inpsrc, StdinSource):
-                func = self._collect_tuple_from_stdin
-            else:
-                raise ValueError(f"unrecognized input source {inpsrc}")
+        for source in self._input_sources:
+            func: Callable = CodeUtils.search_for_codes
+            args: tuple = (source,)
 
             pool_res.append(pool.apply(func, args))
 
@@ -93,36 +100,24 @@ class Boot:
 
         return res
 
-    def _collect_tuple_from_path(self, path: Path) -> CodeTuple:
-        # parser = TypescriptParser(Path(args.path))
-        # parsed = await parser.parse()
-        # out_dir = Path("var")
-        # out_dir.mkdir(parents=True, exist_ok=True)
-        # with Path(out_dir, "out.ts").open("w+") as f:
-        #     f.write(parsed)
-        return "path", "path", "path", "path", "path"
-
-    def _collect_tuple_from_stdin(self) -> CodeTuple:
-        return "stdin", "stdin", "stdin", "stdin", "stdin"
-
     def _write_content_to_output_sources(self, content: str) -> None:
         processes: list[Process] = []
 
-        for outsrc in self._output_sources:
-            if isinstance(outsrc, PathSource):
+        for source in self._output_sources:
+            if isinstance(source, FilepathSource):
                 p = Process(
                     target=self._write_to_output_file,
                     args=(
-                        outsrc.source,
+                        source.source,
                         content
                     )
                 )
                 p.start()
                 processes.append(p)
-            elif isinstance(outsrc, StdoutSource):
-                print(content)
+            elif isinstance(source, TextIOSource):
+                source.source.write(content)
             else:
-                raise ValueError(f"unrecognized output source {outsrc}")
+                raise ValueError(f"unrecognized output source {source}")
 
         for p in processes:
             p.join()
