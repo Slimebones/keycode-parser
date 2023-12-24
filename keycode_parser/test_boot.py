@@ -17,19 +17,19 @@ from keycode_parser.boot import Boot
             "txt",
             "c.p.m.t.v1,c.p.m.t.v2",
             "txt",
-            "c.p.m.t.v1,c.p.m.t.v2",
+            "c.p.m.t.v2,c.p.m.t.v1",
         ),
         (
             "py",
             "@code(\"c.p.m.t.v1\") @code(\"c.p.m.t.v2\")",
             "txt",
-            "c.p.m.t.v1,c.p.m.t.v2",
+            "c.p.m.t.v2,c.p.m.t.v1",
         ),
         (
             "ts",
             "@code(\"c.p.m.t.v1\") @code(\"c.p.m.t.v2\")",
             "txt",
-            "c.p.m.t.v1,c.p.m.t.v2",
+            "c.p.m.t.v2,c.p.m.t.v1",
         ),
         # ---
 
@@ -45,6 +45,7 @@ from keycode_parser.boot import Boot
             class m:
                 class t:
                     v2 = "c.p.m.t.v2"
+                    v1 = "c.p.m.t.v1"
 """,
         ),
         (
@@ -57,6 +58,7 @@ from keycode_parser.boot import Boot
             class m:
                 class t:
                     v2 = "c.p.m.t.v2"
+                    v1 = "c.p.m.t.v1"
 """,
         ),
         (
@@ -69,6 +71,7 @@ from keycode_parser.boot import Boot
             class m:
                 class t:
                     v2 = "c.p.m.t.v2"
+                    v1 = "c.p.m.t.v1"
 """,
         ),
         # ---
@@ -84,6 +87,7 @@ from keycode_parser.boot import Boot
       m: {
         t: {
           v2: "c.p.m.t.v2",
+          v1: "c.p.m.t.v1",
         },
       },
     },
@@ -101,6 +105,7 @@ from keycode_parser.boot import Boot
       m: {
         t: {
           v2: "c.p.m.t.v2",
+          v1: "c.p.m.t.v1",
         },
       },
     },
@@ -118,6 +123,7 @@ from keycode_parser.boot import Boot
       m: {
         t: {
           v2: "c.p.m.t.v2",
+          v1: "c.p.m.t.v1",
         },
       },
     },
@@ -150,4 +156,8 @@ async def test_stdin_stdout(
 
         # remove mock for possible print-debug without surprises
         sys.stdout.write = original_stdout_write
+        print("---")
+        print(expected_stdout)
+        print()
+        print(res)
         assert res == expected_stdout

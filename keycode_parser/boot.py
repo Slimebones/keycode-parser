@@ -1,3 +1,4 @@
+from glob import glob
 import multiprocessing as mp
 import sys
 from multiprocessing import Process
@@ -13,7 +14,7 @@ from keycode_parser.codeparsers import (
     TypescriptCodeParser,
 )
 from keycode_parser.sources import (
-    FilepathSource,
+    PathSource,
     Source,
     SourceContract,
     TextIOSource,
@@ -52,11 +53,15 @@ class Boot:
             if r.startswith("@"):
                 res.append(cls._parse_special_raw_source(r, mode))
                 continue
-            path = Path(r)
-            res.append(FilepathSource(
-                source=path,
-                contract=SourceContract(path.suffix.replace(".", "")).value,
-            ))
+
+            for pathstr in glob(r):
+                path = Path(r)
+                res.append(PathSource(
+                    source=path,
+                    contract=SourceContract(
+                        path.suffix.replace(".", "")
+                    ).value,
+                ))
 
         return res
 
@@ -142,7 +147,7 @@ class Boot:
                     )
             content = content_by_contract[source.contract]
 
-            if isinstance(source, FilepathSource):
+            if isinstance(source, PathSource):
                 p = Process(
                     target=self._write_to_output_file,
                     args=(

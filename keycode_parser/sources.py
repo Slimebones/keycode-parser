@@ -88,7 +88,7 @@ class TextIOSource(Source):
         raise TypeError
 
 
-class FilepathSource(Source):
+class PathSource(Source):
     source: Path
 
 
@@ -104,7 +104,7 @@ class SourceUtils(Static):
     def read(source: Source) -> str:
         if isinstance(source, TextIOSource):
             return source.source.read()
-        elif isinstance(source, FilepathSource):
+        elif isinstance(source, PathSource):
             with source.source.open("r") as f:
                 return f.read()
         else:
