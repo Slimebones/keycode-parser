@@ -3,7 +3,7 @@ import multiprocessing as mp
 import sys
 from multiprocessing import Process
 from pathlib import Path
-from typing import Callable, Literal, Self
+from typing import Callable, Iterable, Literal, Self
 
 from autofiles import AutoUtils, FileExtension
 from pykit import Log
@@ -38,14 +38,18 @@ class Boot:
         self._output_sources = output_sources
 
     @classmethod
-    def from_cli(cls, input_args: list[str], output_args: list[str]) -> Self:
+    def from_cli(
+        cls,
+        input_args: Iterable[str],
+        output_args: Iterable[str]
+    ) -> Self:
         input_sources = cls._parse_sources(input_args, "input")
         output_sources = cls._parse_sources(output_args, "output")
         return cls(input_sources, output_sources)
 
     @classmethod
     def _parse_sources(
-        cls, raw: list[str], mode: Literal["input", "output"],
+        cls, raw: Iterable[str], mode: Literal["input", "output"],
     ) -> list[Source]:
         res: list[Source] = []
 
@@ -54,8 +58,9 @@ class Boot:
                 res.append(cls._parse_special_raw_source(r, mode))
                 continue
 
-            for pathstr in glob(r):
-                path = Path(r)
+            print(r, glob(r, recursive=True, include_hidden=True), Path.cwd())
+            for pathstr in glob(r, recursive=True, include_hidden=True):
+                path = Path(pathstr)
                 res.append(PathSource(
                     source=path,
                     contract=SourceContract(
