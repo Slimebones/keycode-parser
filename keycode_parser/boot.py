@@ -58,8 +58,20 @@ class Boot:
                 res.append(cls._parse_special_raw_source(r, mode))
                 continue
 
-            print(r, glob(r, recursive=True, include_hidden=True), Path.cwd())
-            for pathstr in glob(r, recursive=True, include_hidden=True):
+            glb = glob(r, recursive=True, include_hidden=True)
+
+            # not a glob
+            if len(glb) == 0:
+                path = Path(r)
+                res.append(PathSource(
+                    source=path,
+                    contract=SourceContract(
+                        path.suffix.replace(".", "")
+                    ).value,
+                ))
+                continue
+
+            for pathstr in glb:
                 path = Path(pathstr)
                 res.append(PathSource(
                     source=path,
